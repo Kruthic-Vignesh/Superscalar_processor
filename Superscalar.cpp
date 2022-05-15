@@ -256,7 +256,6 @@ void loadFU()
 
 void storeFU()
 {
-    cout << "ongomma" << endl;
     running++;
     str_bf.free = true;
     int base = str_bf.bf.ops[0], offset = str_bf.bf.ops[1];
