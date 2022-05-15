@@ -150,6 +150,7 @@ void update_rob_entry(reservation_station bf, int value)
                 // cout<<i<<" "<<arf[i].tag<<endl;
                 arf[i].data = value;
                 arf[i].busy = false;
+                arf[i].tag = -1;
             }
         }
 
@@ -255,6 +256,7 @@ void loadFU()
 
 void storeFU()
 {
+    cout << "ongomma" << endl;
     running++;
     str_bf.free = true;
     int base = str_bf.bf.ops[0], offset = str_bf.bf.ops[1];
@@ -536,4 +538,3 @@ int main()
     make_outputs();                 //Ready ODCache and Output.txt
     close_files();                  //Close files
 }
-
