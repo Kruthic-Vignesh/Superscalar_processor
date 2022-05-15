@@ -13,7 +13,6 @@ int no_of_cycles = 0, no_of_stalls = 0, no_of_instructions = 0;                 
 int data_stalls = 0, control_stalls = 0;                                                                //Stall counters   
 string inst_reg;                                                                                        //Instruction register
 
-bool Free[5], Skip[5];                      //Flags to indicate if a stage is free / should be skipped
 bool jump = false, halt = false;
 
 ifstream i_rd, r_rd;                        //Input and output file readers
@@ -97,9 +96,9 @@ public:
 
 void instruction_fetch()
 {
-    cout<<jump<<" "<<halt<<endl;
+    // cout<<jump<<" "<<halt<<endl;
     if(i_rd.eof() || jump || halt)  return;
-    cout<<"yes"<<endl;
+    // cout<<"yes"<<endl;
     running++;
     f_bf.busy = true;
 
@@ -133,23 +132,22 @@ void instruction_decode()
     bool ret = dispatch_to_rsrob(OPCode, s);
 }
 
-// finish this
 void update_rob_entry(reservation_station bf, int value)
 {
     running++;
     int rb = bf.rob_index;
-    if(bf.opcode <= 8)     // ALU op, have to update registers
+    if(bf.opcode <= 8)     // ALU/Load op, have to update registers
     {
         int rf_ind = rob[rb].rename_tag;    // corresponding rename register
         rrf[rf_ind].data = value;
         rrf[rf_ind].valid = true, rrf[rf_ind].busy = false;
 
-        cout<<"tag is "<<rf_ind<<endl;
+        // cout<<"tag is "<<rf_ind<<endl;
         for(int i = 0; i < REG_COUNT; i++)
         {
             if(arf[i].tag == rf_ind)        // Architectural register whose tag is rf_ind
             {
-                cout<<i<<" "<<arf[i].tag<<endl;
+                // cout<<i<<" "<<arf[i].tag<<endl;
                 arf[i].data = value;
                 arf[i].busy = false;
             }
@@ -539,324 +537,3 @@ int main()
     close_files();                  //Close files
 }
 
-/* PREV EXECUTE */
-    // switch(OPCode)
-    // {
-    //     case 0:             //ADD instruction
-    //     case 1:             //SUB instruction
-    //     case 2:             //MUL instruction
-    //     case 4:             //AND instruction
-    //     case 5:             //OR instruction
-    //     case 7:             //XOR instruction
-    //     {
-    //         if(reg[source1].free)       d_bf.a = reg[source1].val;      //Taking from architectural register
-    //         else if(f[source1].valid)   d_bf.a = f[source1].val;        //Taking from forwarding register
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-
-    //         if(reg[source2].free)       d_bf.b = reg[source2].val;
-    //         else if(f[source2].valid)   d_bf.b = f[source2].val;
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-
-    //         reg[dest].free = false;
-    //         d_bf.c = dest;
-    //         break;
-    //     }
-        
-    //     case 3:             //INC instruction
-    //     {
-    //         if(reg[dest].free)          d_bf.a = reg[dest].val;
-    //         else if(f[dest].valid)      d_bf.a = f[dest].val;
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-    //         d_bf.c = dest;
-    //         reg[dest].free = false;
-    //         break;
-    //     }
-
-    //     case 6:             //NOT instruction
-    //     {
-    //         if(reg[source1].free)       d_bf.a = reg[source1].val;
-    //         else if(f[source1].valid)   d_bf.a = f[source1].val;
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-    //         d_bf.c = dest;
-    //         reg[dest].free = false;
-    //         break;
-    //     }
-
-    //     case 8:             //LOAD instruction
-    //     {
-    //         if(reg[source1].free)       d_bf.a = reg[source1].val;
-    //         else if(f[source1].valid)   d_bf.a = f[source1].val;
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-    //         d_bf.c = dest;
-    //         reg[dest].free = false;
-    //         d_bf.b = source2;
-    //         break;
-    //     }
-
-    //     case 9:         //STORE instruction
-    //     {
-    //         if(reg[dest].free)          d_bf.c = reg[dest].val;
-    //         else if(f[dest].valid)      d_bf.c = f[dest].val;
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-
-    //         if(reg[source1].free)       d_bf.a = reg[source1].val;
-    //         else if(f[source1].valid)   d_bf.a = f[source1].val;
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-    //         d_bf.b = source2;
-    //         break;
-    //     }
-
-    //     case 10:        //JMP instruction
-    //     {
-    //         d_bf.jump = true;
-    //         d_bf.c = ((dest<<4) + source1 - ((dest&8)?(1<<8):0));
-    //         break;
-    //     }
-
-    //     case 11:        //BEQZ instruction
-    //     {
-    //         if(reg[dest].free)          d_bf.a = reg[dest].val;
-    //         else if(f[dest].valid)      d_bf.a = f[dest].val;
-    //         else
-    //         {
-    //             d_bf.dependency = true;
-    //             break;
-    //         }
-    //         d_bf.jump = true;
-    //         d_bf.c = (source1<<4) + source2 - ((source1&8)?(1<<8):0);
-    //         break;
-    //     }
-
-    //     case 15:
-    //     {
-    //         Skip[0] = true;
-    //         break;
-    //     }
-    // }
-    
-    // if(d_bf.dependency)
-    // {
-    //     Free[0] = false;
-    //     Skip[2] = true;
-    //     data_stalls++;
-    // }
-    // else if(d_bf.jump)
-    // {
-    //     Free[0] = false;
-    //     Skip[1] = true;
-    //     Skip[2] = false;
-    // }
-    // else Skip[2] = false;
-
-
-// void instruction_execute()              //Execute stage 
-// {
-//     if(Skip[2] || !Free[2])
-//     {
-//         Skip[3] = true;
-//         return;
-//     }
-    
-//     Skip[3] = false;
-//     running++;
-//     e_bf.opcode = d_bf.opcode;
-
-//     if(d_bf.opcode==15)                 //if HALT instruction, return
-//         return;
-    
-//     int ALUOutput = ALU(d_bf.opcode, d_bf.a, d_bf.b);
-
-//     if(d_bf.opcode < 8)
-//     {
-//         e_bf.val = ALUOutput;
-//         e_bf.add = d_bf.c;
-
-//         reg[d_bf.c].free = false;
-//         f[e_bf.add].valid = true;
-//         f[d_bf.c].val = ALUOutput;
-//     }
-//     else if(d_bf.opcode == 8)
-//     {
-//         e_bf.add = ALUOutput;
-//         e_bf.val = d_bf.c;
-//         reg[d_bf.c].free = false;
-//     }
-//     else if(d_bf.opcode == 9)
-//     {
-//         e_bf.add = ALUOutput;
-//         e_bf.val = d_bf.c;
-//     }
-//     else if(d_bf.opcode == 10)
-//     {
-//         PC = ALUOutput;
-//         Free[0] = Free[1] = false;
-//     }
-//     else if(d_bf.opcode == 11)
-//     {
-//         if(d_bf.a == 0)
-//         {
-//             PC = ALUOutput;
-//         }
-//         Free[0] = Free[1] = false;
-//     }
-// }
-
-
-
-
-
-
-
-
-
-/* Memory */
-
-// void instruction_memory()                   //Memory Access stage
-// {
-//     if(Skip[3] || !Free[3])
-//     {
-//         Skip[4] = true;
-//         return;
-//     }
-
-//     m_bf.opcode = e_bf.opcode;
-//     Skip[4] = false;
-//     running++;
-//     m_bf.val = 0;
-    
-//     if(e_bf.opcode == 8)                    //Load value from DCache
-//     {
-//         dp.seekg(e_bf.add*3);
-//         string in;
-//         getline(dp, in, '\n');
-        
-//         if(in[0] <= '9')    m_bf.val += (in[0]-'0')<<4;
-//         else                m_bf.val += (in[0]-'a'+10)<<4;
-        
-//         if(in[1] <= '9')    m_bf.val += in[1]-'0';
-//         else                m_bf.val += in[1]-'a'+10;
-        
-//         if(m_bf.val & 128)  m_bf.val -= 256;
-        
-//         m_bf.reg = e_bf.val;
-
-//         reg[m_bf.reg].free = false;
-//         f[m_bf.reg].valid = true;
-//         f[m_bf.reg].val = m_bf.val; 
-//     }
-//     else if(e_bf.opcode == 9)           //Store value in DCache
-//     {
-//         dp.seekg(e_bf.add*3);
-//         char low, high;
-        
-//         if(e_bf.val < 0)    e_bf.val += (1<<8);
-        
-//         if((e_bf.val & 15) <= 9)    low = '0' + (e_bf.val&15);
-//         else                        low = 'a' + (e_bf.val&15)-10;
-        
-//         e_bf.val = e_bf.val>>4;
-        
-//         if((e_bf.val&15) <= 9)      high = '0' + (e_bf.val&15);
-//         else                        high = 'a' + (e_bf.val&15)-10;
-        
-//         dp.put(high);
-//         dp.put(low);
-//     }
-//     else
-//     {
-//         m_bf.reg = e_bf.add;
-//         m_bf.val = e_bf.val;
-//     }
-// }
-
-
-
-
-
-
-// void update_status()                //Update counters after write_back of an instruction
-// {
-//     no_of_instructions++;
-//     switch(m_bf.opcode)
-//     {
-//         case 0:         //ADD
-//         case 1:         //SUB
-//         case 2:         //MUL
-//         case 3:         //INC
-//         {
-//             arithmetic_instructions++;
-//             break;
-//         }
-//         case 4:         //AND
-//         case 5:         //OR
-//         case 6:         //NOT
-//         case 7:         //XOR
-//         {
-//             logical_instructions++;
-//             break;
-//         }
-
-//         case 8:         //LOAD
-//         case 9:         //STORE
-//         {
-//             data_instructions++;
-//             break;
-//         }
-
-//         case 10:        //JMP
-//         case 11:        //BEQZ
-//         {
-//             control_instructions++;
-//             break;
-//         }
-//         case 15:        //HALT
-//         {
-//             halt_instructions++;
-//             break;
-//         }
-//     }
-// }
-
-
-
-
-// void instruction_writeback()
-// {
-//     if(Skip[4] || !Free[4]) return;
-
-//     running++;
-//     if(m_bf.opcode <= 8)
-//     {
-//         reg[m_bf.reg].val = m_bf.val;
-//         reg[m_bf.reg].free = true; 
-//         f[m_bf.reg].valid = false;
-//     }
-// }
